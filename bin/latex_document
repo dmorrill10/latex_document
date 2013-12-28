@@ -1,0 +1,77 @@
+#!/usr/bin/env ruby
+require "rubygems"
+require 'thor'
+require 'date'
+
+module CProject
+  class New < Thor::Group
+    include Thor::Actions
+
+    argument :name, :desc => 'Name of the new project.'
+
+    def self.source_root
+      File.expand_path('../../', __FILE__)
+    end
+
+    def gen_root
+      empty_directory name
+    end
+
+    def fill_root
+      create_file_from_template "LICENCE"
+      create_file_from_template "README.md"
+      create_file_from_template "Makefile"
+    end
+
+    def src
+      create_file_from_template 'src/CExceptionConfig.h'
+      template 'templates/src/c_project.c.tt', file_path("src/#{name}.c")
+      template 'templates/src/c_project.h.tt', file_path("src/#{name}.h")
+      create_file_from_template 'src/main.c'
+    end
+
+    def test
+      template 'templates/test/test_c_project.c.tt', file_path("test/test_#{name}.c")
+    end
+
+    def support
+      create_file_from_template 'test/support/test_helper.c'
+      create_file_from_template 'test/support/test_helper.h'
+    end
+
+    def vendor
+      directory 'templates/vendor', file_path("vendor")
+    end
+
+    private
+
+    def header_guard
+      "__#{name.upcase}_H__"
+    end
+
+    def file_path(file_name)
+      File.join name, file_name
+    end
+
+    def create_file_from_template(file_name)
+      template(
+        "templates/#{file_name}.tt",
+        file_path(file_name)
+      )
+    end
+  end
+
+  class CProject < Thor
+    map 'n' => :new
+
+    register(
+      New,
+      'new',
+      'new NAME',
+      "Creates a new C project the name NAME"
+    )
+    tasks["new"].options = New.class_options
+  end
+end
+
+CProject::CProject.start(ARGV)

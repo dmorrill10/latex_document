@@ -1,0 +1,79 @@
+%packages
+% Deprecation warnings
+\RequirePackage[l2tabu, orthodox]{nag}
+
+% Scientific units
+\usepackage{siunitx}
+
+% Math
+\usepackage{amsmath}
+
+% Page geometry and margins
+\usepackage[margin=1.00in]{geometry}
+\linespread{1.25}
+
+% Images
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Tables with out vertical separators
+\usepackage{booktabs}
+
+% ?
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+
+\usepackage[stable]{footmisc}
+\parfillskip 0pt plus 0.75\textwidth
+
+% Bibliography
+\usepackage[english]{babel}% Recommended
+\usepackage{csquotes}% Recommended
+\usepackage{biblatex}
+
+% Typesetting enhancements
+\usepackage{microtype}
+
+% Links
+\usepackage{xcolor}
+\definecolor{dark-red}{rgb}{0.4,0.15,0.15}
+\definecolor{dark-blue}{rgb}{0.15,0.15,0.4}
+\definecolor{medium-blue}{rgb}{0,0,0.5}
+\PassOptionsToPackage{hyphens}{url}\usepackage[pdfborder={0 0 0}]{hyperref}
+\hypersetup{
+  colorlinks, linkcolor={dark-red},
+  citecolor={dark-blue}, urlcolor={medium-blue}
+}
+
+% Cross-references
+\usepackage{cleveref}
+
+% Code listings
+\usepackage{listings}
+
+% layout
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+\topmargin 0in
+\headheight 0in
+\headsep 0in
+\textheight 9in
+\textwidth 6.5in
+\oddsidemargin 0in
+\evensidemargin 0in
+
+% Header
+%\usepackage{fancyhdr}
+%\pagestyle{fancy}
+
+% Verbatim text
+\usepackage{verbatim}
+
+% Notes and todos
+\usepackage{todonotes}
+
+\usepackage{appendix}
