@@ -1,0 +1,19 @@
+\documentclass[11pt]{article}
+\usepackage{../include/mydefault}
+
+\addbibresource{references.bib}
+
+% Document metadata
+\title{<%= title %>}
+\author{@todo Author}
+\date{<%= date %>}
+
+\begin{document}
+  \sloppy
+  \maketitle
+
+\printbibliography
+
+\appendix
+
+\end{document}

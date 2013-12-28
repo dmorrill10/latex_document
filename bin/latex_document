@@ -3,7 +3,7 @@ require "rubygems"
 require 'thor'
 require 'date'
 
-module CProject
+module LatexDocument
   class New < Thor::Group
     include Thor::Actions
 
@@ -18,35 +18,32 @@ module CProject
     end
 
     def fill_root
-      create_file_from_template "LICENCE"
-      create_file_from_template "README.md"
+      empty_directory file_path('src')
+      empty_directory file_path('include')
+      empty_directory file_path('diagrams')
       create_file_from_template "Makefile"
     end
 
     def src
-      create_file_from_template 'src/CExceptionConfig.h'
-      template 'templates/src/c_project.c.tt', file_path("src/#{name}.c")
-      template 'templates/src/c_project.h.tt', file_path("src/#{name}.h")
-      create_file_from_template 'src/main.c'
+      template("templates/document.tex.tt", file_path("src/#{name}.tex"))
+      template("templates/references.bib.tt", file_path("src/references.bib"))
     end
 
-    def test
-      template 'templates/test/test_c_project.c.tt', file_path("test/test_#{name}.c")
-    end
-
-    def support
-      create_file_from_template 'test/support/test_helper.c'
-      create_file_from_template 'test/support/test_helper.h'
-    end
-
-    def vendor
-      directory 'templates/vendor', file_path("vendor")
+    def include
+      template("templates/mydefault.sty.tt", file_path("include/mydefault.sty"))
     end
 
     private
 
-    def header_guard
-      "__#{name.upcase}_H__"
+    def title
+      title_string = name.dup
+      title_string[0] = name[0].upcase
+      title_string.gsub(/(\w)([A-Z])/) { "#{$1} #{$2}" } # Camel case
+      title_string.gsub(/[_\.\s](.)/) { " #{$1.upcase}" } # Snake case
+    end
+
+    def date
+      Date.today.to_s
     end
 
     def file_path(file_name)
@@ -61,17 +58,17 @@ module CProject
     end
   end
 
-  class CProject < Thor
+  class LatexDocument < Thor
     map 'n' => :new
 
     register(
       New,
       'new',
       'new NAME',
-      "Creates a new C project the name NAME"
+      "Creates a new latex document NAME"
     )
     tasks["new"].options = New.class_options
   end
 end
 
-CProject::CProject.start(ARGV)
+LatexDocument::LatexDocument.start(ARGV)

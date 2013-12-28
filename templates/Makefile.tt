@@ -1,7 +1,7 @@
 
 default: pdf
 
-TARGET_BASE = morrill.cmput681.project.report.dec2_2013
+TARGET_BASE = <%= name %>
 DVI_COMMAND := cd build && latex $(TARGET_BASE)
 
 build:
@@ -13,7 +13,7 @@ dvi: clean src/$(TARGET_BASE).tex build
 	$(DVI_COMMAND)
 	$(DVI_COMMAND) # Odd latex thing necessary for references
 	mv build/$(TARGET_BASE).dvi ./
-	
+
 pdf: dvi
 	dvipdf $(TARGET_BASE).dvi
 
