@@ -4,10 +4,13 @@ require 'thor'
 require 'date'
 
 module LatexDocument
-  class New < Thor::Group
+  class NewDocument < Thor::Group
     include Thor::Actions
 
-    argument :name, :desc => 'Name of the new project.'
+    DEFAULT_AUTHOR = 'TODO: Author'
+
+    argument :name, :desc => 'Name of the new document.'
+    class_option :author, :desc => 'Author of the new document.', :default => DEFAULT_AUTHOR
 
     def self.source_root
       File.expand_path('../../', __FILE__)
@@ -18,22 +21,10 @@ module LatexDocument
     end
 
     def fill_root
-      empty_directory file_path('src')
-      empty_directory file_path('include')
-      empty_directory file_path('diagrams')
       create_file_from_template "Makefile"
     end
 
-    def src
-      template("templates/document.tex.tt", file_path("src/#{name}.tex"))
-      template("templates/references.bib.tt", file_path("src/references.bib"))
-    end
-
-    def include
-      template("templates/mydefault.sty.tt", file_path("include/mydefault.sty"))
-    end
-
-    private
+    protected
 
     def title
       title_string = name.dup
@@ -42,15 +33,19 @@ module LatexDocument
       title_string.gsub(/[_\.\s](.)/) { " #{$1.upcase}" } # Snake case
     end
 
+    def author
+      options[:author]
+    end
+
     def date
-      Date.today.to_s
+      Date.today.strftime('%B %-d, %Y')
     end
 
     def file_path(file_name)
       File.join name, file_name
     end
 
-    def create_file_from_template(file_name)
+    def create_file_from_shared_template(file_name)
       template(
         "templates/#{file_name}.tt",
         file_path(file_name)
@@ -58,16 +53,71 @@ module LatexDocument
     end
   end
 
+  class Tex < NewDocument
+    def fill_root
+      super
+      empty_directory file_path('src')
+      empty_directory file_path('include')
+    end
+
+    def src
+      template("templates/tex/src/document.tex.tt", file_path("src/#{name}.tex"))
+      template("templates/references.bib.tt", file_path("src/references.bib"))
+    end
+
+    def include
+      create_file_from_template("include/mydefault.sty")
+    end
+
+    protected
+
+    def create_file_from_template(file_name)
+      template(
+        "templates/tex/#{file_name}.tt",
+        file_path(file_name)
+      )
+    end
+
+  end
+
+  class Md < NewDocument
+    def fill_root
+      super
+      template("templates/md/document.tex.md.tt", file_path("#{name}.tex.md"))
+      create_file_from_shared_template 'references.bib'
+      create_file_from_template 'template.pandoc'
+    end
+
+    protected
+
+    def create_file_from_template(file_name)
+      template(
+        "templates/md/#{file_name}.tt",
+        file_path(file_name)
+      )
+    end
+  end
+
   class LatexDocument < Thor
-    map 'n' => :new
+    map 't' => :tex
 
     register(
-      New,
-      'new',
-      'new NAME',
-      "Creates a new latex document NAME"
+      Tex,
+      'tex',
+      "tex NAME [author=AUTHOR]",
+      "Creates a new latex document with name NAME and author AUTHOR, the latter of which defaults to \"#{Tex::DEFAULT_AUTHOR}\"."
     )
-    tasks["new"].options = New.class_options
+    tasks["tex"].options = Tex.class_options
+
+    map 'm' => :md
+
+    register(
+      Md,
+      'md',
+      "md NAME [author=AUTHOR]",
+      "Creates a new markdown/latex hybrid document with name NAME and author AUTHOR, the latter of which defaults to \"#{Md::DEFAULT_AUTHOR}]\"."
+    )
+    tasks["md"].options = Md.class_options
   end
 end
 

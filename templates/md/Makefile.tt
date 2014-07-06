@@ -1,0 +1,43 @@
+#THIS_DIR := $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST)))
+THIS_DIR := ./
+
+default: pdf
+
+TARGET_BASE = <%= name %>
+TARGET := $(TARGET_BASE).pdf
+SRC_DIR = $(THIS_DIR)
+TARGET_SRC := $(SRC_DIR)/$(TARGET_BASE).tex.md
+
+BIB := $(SRC_DIR)/references.bib
+
+TEMPLATE_DIR = $(THIS_DIR)
+TEMPLATE = template.pandoc
+TEMPLATE_SRC := $(TEMPLATE_DIR)/$(TEMPLATE)
+
+# Default geometry
+geometry = margin=1cm,landscape
+
+$(TARGET): $(TEMPLATE_SRC) $(TARGET_SRC) | $(TEMPLATE_DIR)
+	pandoc $(TARGET_SRC) -o $(THIS_DIR)/$(TARGET) --template=$(TEMPLATE_SRC) --biblio $(BIB) --variable geometry:$(geometry)
+
+pdf: $(TARGET)
+
+# Constant definition
+NIL = __NIL__
+
+# Arguments to the `link` command
+template := $(NIL)
+biblio := $(NIL)
+
+link:
+	if [ $(template) != $(NIL) ] && [ -e $(template) ]; then \
+    rm $(TEMPLATE_SRC) > /dev/null; \
+	  ln -s $(template) $(TEMPLATE_SRC); \
+  fi; \
+  if [ $(biblio) != $(NIL) ] && [ -e $(biblio) ]; then \
+    rm $(BIB) > /dev/null; \
+    ln -s $(biblio) $(BIB); \
+  fi;
+
+clean:
+	-rm $(TARGET)

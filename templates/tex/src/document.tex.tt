@@ -5,7 +5,7 @@
 
 % Document metadata
 \title{<%= title %>}
-\author{@todo Author}
+\author{<%= author %>}
 \date{<%= date %>}
 
 \begin{document}

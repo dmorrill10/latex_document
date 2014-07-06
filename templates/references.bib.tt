@@ -1,0 +1,10 @@
+@inproceedings{Lanctot09mccfr,
+  title =     {Monte Carlo Sampling for Regret Minimization in Extensive Games},
+  author =    {Marc Lanctot and Kevin Waugh and Martin Zinkevich and Michael Bowling},
+  booktitle = {Advances in Neural Information Processing Systems 22},
+  editor =    {Y. Bengio and D. Schuurmans and J. Lafferty and C. K. I. Williams and A. Culotta},
+  pages =     {1078--1086},
+  year =      {2009},
+  AcceptRate = {24\%},
+  AcceptNumbers = {263 of 1105}
+}
