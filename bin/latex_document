@@ -104,7 +104,7 @@ module LatexDocument
     register(
       Tex,
       'tex',
-      "tex NAME [author=AUTHOR]",
+      "tex NAME [--author=AUTHOR]",
       "Creates a new latex document with name NAME and author AUTHOR, the latter of which defaults to \"#{Tex::DEFAULT_AUTHOR}\"."
     )
     tasks["tex"].options = Tex.class_options
@@ -114,7 +114,7 @@ module LatexDocument
     register(
       Md,
       'md',
-      "md NAME [author=AUTHOR]",
+      "md NAME [--author=AUTHOR]",
       "Creates a new markdown/latex hybrid document with name NAME and author AUTHOR, the latter of which defaults to \"#{Md::DEFAULT_AUTHOR}]\"."
     )
     tasks["md"].options = Md.class_options
