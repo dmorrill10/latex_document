@@ -2,6 +2,7 @@
 require "rubygems"
 require 'thor'
 require 'date'
+require 'latex_document/version'
 
 module LatexDocument
   class NewDocument < Thor::Group
@@ -83,9 +84,11 @@ module LatexDocument
   class Md < NewDocument
     def fill_root
       super
-      template("templates/md/document.tex.md.tt", file_path("#{name}.tex.md"))
+      template("templates/md/document.md.tt", file_path("#{name}.md"))
       create_file_from_shared_template 'references.bib'
-      create_file_from_template 'template.pandoc'
+      ['pdf', 'tex', 'html'].each do |format|
+        create_file_from_template "#{format}.template.pandoc"
+      end
     end
 
     protected
@@ -99,6 +102,16 @@ module LatexDocument
   end
 
   class LatexDocument < Thor
+
+    # Thanks to Adam Prescott
+    # (http://stackoverflow.com/questions/22809972/adding-a-version-option-to-a-ruby-thor-cli)
+    # for this.
+    map %w[--version -v] => :__print_version
+    desc "--version, -v", "Show version information"
+    def __print_version
+      puts VERSION
+    end
+
     map 't' => :tex
 
     register(

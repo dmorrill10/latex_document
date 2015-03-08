@@ -1,43 +1,39 @@
+default: pdf
+.PHONY: default
+
 #THIS_DIR := $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST)))
 THIS_DIR := ./
 
-default: pdf
+TARGET_BASE :=<%= name %>
+SRC_DIR :=$(THIS_DIR)
+TARGET_SRC :=$(SRC_DIR)/$(TARGET_BASE).md
 
-TARGET_BASE = <%= name %>
-TARGET := $(TARGET_BASE).pdf
-SRC_DIR = $(THIS_DIR)
-TARGET_SRC := $(SRC_DIR)/$(TARGET_BASE).tex.md
+BIB :=$(SRC_DIR)/references.bib
 
-BIB := $(SRC_DIR)/references.bib
-
-TEMPLATE_DIR = $(THIS_DIR)
-TEMPLATE = template.pandoc
-TEMPLATE_SRC := $(TEMPLATE_DIR)/$(TEMPLATE)
+TEMPLATE_DIR :=$(THIS_DIR)
+TEMPLATE :=template.pandoc
 
 # Default geometry
-geometry = margin=1cm,landscape
+geometry =margin=1cm
 
-$(TARGET): $(TEMPLATE_SRC) $(TARGET_SRC) | $(TEMPLATE_DIR)
-	pandoc $(TARGET_SRC) -o $(THIS_DIR)/$(TARGET) --template=$(TEMPLATE_SRC) --biblio $(BIB) --variable geometry:$(geometry)
+$(TARGET_BASE).%:: $(TARGET_SRC) $(TEMPLATE_DIR)/%.$(TEMPLATE) | $(TEMPLATE_DIR)
+	pandoc $(TARGET_SRC) -o $(THIS_DIR)/$@ --template=$(TEMPLATE_DIR)/$*.$(TEMPLATE) --biblio $(BIB) --variable geometry:$(geometry)
 
-pdf: $(TARGET)
+# Add rules for different file types like this:
+pdf: $(TARGET_BASE).pdf
+.PHONY: pdf
+tex: $(TARGET_BASE).tex
+.PHONY: tex
+html: $(TARGET_BASE).html
+.PHONY: html
 
-# Constant definition
-NIL = __NIL__
 
-# Arguments to the `link` command
-template := $(NIL)
-biblio := $(NIL)
+# Meta-rules
+#===========
+print-%:
+	@echo $* = $($*)
+.PHONY: print-%
 
-link:
-	if [ $(template) != $(NIL) ] && [ -e $(template) ]; then \
-    rm $(TEMPLATE_SRC) > /dev/null; \
-	  ln -s $(template) $(TEMPLATE_SRC); \
-  fi; \
-  if [ $(biblio) != $(NIL) ] && [ -e $(biblio) ]; then \
-    rm $(BIB) > /dev/null; \
-    ln -s $(biblio) $(BIB); \
-  fi;
-
-clean:
-	-rm $(TARGET)
+clean%:
+	-rm $(TARGET_BASE).$*
+.PHONY: clean%
