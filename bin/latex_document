@@ -54,41 +54,11 @@ module LatexDocument
     end
   end
 
-  class Tex < NewDocument
-    def fill_root
-      super
-      empty_directory file_path('src')
-      empty_directory file_path('include')
-    end
-
-    def src
-      template("templates/tex/src/document.tex.tt", file_path("src/#{name}.tex"))
-      template("templates/references.bib.tt", file_path("src/references.bib"))
-    end
-
-    def include
-      create_file_from_template("include/mydefault.sty")
-    end
-
-    protected
-
-    def create_file_from_template(file_name)
-      template(
-        "templates/tex/#{file_name}.tt",
-        file_path(file_name)
-      )
-    end
-
-  end
-
   class Md < NewDocument
     def fill_root
       super
       template("templates/md/document.md.tt", file_path("#{name}.md"))
       create_file_from_shared_template 'references.bib'
-      ['pdf', 'tex', 'html'].each do |format|
-        create_file_from_template "#{format}.template.pandoc"
-      end
     end
 
     protected
@@ -111,16 +81,6 @@ module LatexDocument
     def __print_version
       puts VERSION
     end
-
-    map 't' => :tex
-
-    register(
-      Tex,
-      'tex',
-      "tex NAME [--author=AUTHOR]",
-      "Creates a new latex document with name NAME and author AUTHOR, the latter of which defaults to \"#{Tex::DEFAULT_AUTHOR}\"."
-    )
-    tasks["tex"].options = Tex.class_options
 
     map 'm' => :md
 

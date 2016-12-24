@@ -1,39 +1,83 @@
-default: pdf
-.PHONY: default
-
-#THIS_DIR := $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST)))
-THIS_DIR := ./
-
 TARGET_BASE :=<%= name %>
-SRC_DIR :=$(THIS_DIR)
-TARGET_SRC :=$(SRC_DIR)/$(TARGET_BASE).md
+MD_SRC :=$(TARGET_BASE).md
+TEX_SRC :=$(TARGET_BASE).src.tex
+GENERATED_TEX :=$(TARGET_BASE).tex
 
-BIB :=$(SRC_DIR)/references.bib
+BIB :=references.bib
 
-TEMPLATE_DIR :=$(THIS_DIR)
 TEMPLATE :=template.pandoc
 
 # Default geometry
-geometry =margin=1cm
+geometry =margin=2cm
 
-$(TARGET_BASE).%:: $(TARGET_SRC) $(TEMPLATE_DIR)/%.$(TEMPLATE) | $(TEMPLATE_DIR)
-	pandoc $(TARGET_SRC) -o $(THIS_DIR)/$@ --template=$(TEMPLATE_DIR)/$*.$(TEMPLATE) --biblio $(BIB) --variable geometry:$(geometry)
+# Build Rules
+#============
+default: quick
+.PHONY: default
 
-# Add rules for different file types like this:
+ifeq ("$(wildcard $(TEX_SRC))","")
+$(GENERATED_TEX): $(MD_SRC) tex.$(TEMPLATE) $(BIB)
+	pandoc \
+	--biblatex \
+	--template=tex.$(TEMPLATE) \
+	--biblio $(BIB) \
+	--variable geometry:$(geometry) \
+	--variable fontsize:12pt \
+	$(CLASSOPTION) \
+	-s \
+	$< \
+	-o $@
+$(TEX_SRC): $(GENERATED_TEX)
+	mv $< $@
+	rm $(MD_SRC)
+else
+$(GENERATED_TEX): $(TEX_SRC)
+	cp $< $@
+endif
+
+$(TARGET_BASE).pdf: $(GENERATED_TEX)
+	pdflatex $(TARGET_BASE)
+	biber $(TARGET_BASE)
+	pdflatex $(TARGET_BASE)
+	pdflatex $(TARGET_BASE)
+	$(MAKE) clean-extra
+
+quick: $(GENERATED_TEX)
+	pdflatex $(GENERATED_TEX)
+	$(MAKE) clean-extra
+.PHONY: quick
+
 pdf: $(TARGET_BASE).pdf
 .PHONY: pdf
-tex: $(TARGET_BASE).tex
+
+tex: $(GENERATED_TEX)
 .PHONY: tex
-html: $(TARGET_BASE).html
-.PHONY: html
+
+tex-src: $(TEX_SRC)
+.PHONY: tex-src
+
+draft: CLASSOPTION =--variable classoption:draft
+draft: pdf
+.PHONY: draft
+
+final: CLASSOPTION =--variable classoption:final
+final: pdf
+.PHONY: final
 
 
-# Meta-rules
+# Meta Rules
 #===========
 print-%:
 	@echo $* = $($*)
 .PHONY: print-%
 
-clean%:
-	-rm $(TARGET_BASE).$*
-.PHONY: clean%
+clean-extra:
+	@-rm *.log *.aux *.bcf *.bbl *.blg *.dvi *.out *.run.xml *.lot *.lof *.toc $(GENERATED_TEX) || true
+.PHONY: clean-extra
+
+clean: clean-extra clean-pdf
+.PHONY: clean
+
+clean-pdf:
+	@-rm *.pdf || true
+.PHONY: clean-pdf
