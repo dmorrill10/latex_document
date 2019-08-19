@@ -1,9 +1,0 @@
-@inproceedings{rcfr,
-  title =     {Solving Games with Functional Regret Estimation},
-  author =    {Kevin Waugh and Dustin Morrill and J. Andrew Bagnell and Michael Bowling},
-  booktitle = {{Twenty-Ninth AAAI Conference on Artificial Intelligence, January 25-29, 2015, Austin Texas, USA}},
-  year =      {2015},
-  month =     {January},
-  location =  {Austin Texas, USA},
-  pages="2138--2145"
-}
