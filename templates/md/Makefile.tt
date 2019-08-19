@@ -1,68 +1,47 @@
 TARGET_BASE :=<%= name %>
 MD_SRC :=$(TARGET_BASE).md
-TEX_SRC :=$(TARGET_BASE).src.tex
-GENERATED_TEX :=$(TARGET_BASE).tex
+TEX_SRC :=$(TARGET_BASE).tex
+GENERATED_TEX :=$(TARGET_BASE).gen.tex
+GENERATED_PDF :=$(TARGET_BASE).gen.pdf
 
-BIB :=references.bib
-
-TEMPLATE :=template.pandoc
-
-# Default geometry
-geometry =margin=2cm
+ALL_TARGETS :=$(GENERATED_PDF)
 
 # Build Rules
 #============
-default: quick
+default: all
 .PHONY: default
 
-ifeq ("$(wildcard $(TEX_SRC))","")
-$(GENERATED_TEX): $(MD_SRC) tex.$(TEMPLATE) $(BIB)
+all: $(ALL_TARGETS)
+.PHONY: all
+
+ifdef BIB
+  PANDOC_BIB=--biblatex --biblio=$(BIB)
+else
+  PANDOC_BIB=
+endif
+
+ifdef TEMPLATE
+  PANDOC_TEMPLATE=--template=$(TEMPLATE)
+else
+  PANDOC_TEMPLATE=
+endif
+
+%.gen.pdf: %.md $(TEMPLATE) $(BIB)
 	pandoc \
-	--biblatex \
-	--template=tex.$(TEMPLATE) \
-	--biblio $(BIB) \
-	--variable geometry:$(geometry) \
-	--variable fontsize:12pt \
+	$(PANDOC_BIB) \
+	$(PANDOC_TEMPLATE) \
 	$(CLASSOPTION) \
 	-s \
 	$< \
 	-o $@
-$(TEX_SRC): $(GENERATED_TEX)
-	mv $< $@
-	rm $(MD_SRC)
-else
-$(GENERATED_TEX): $(TEX_SRC)
-	cp $< $@
-endif
 
-$(TARGET_BASE).pdf: $(GENERATED_TEX)
-	pdflatex $(TARGET_BASE)
-	biber $(TARGET_BASE)
-	pdflatex $(TARGET_BASE)
-	pdflatex $(TARGET_BASE)
-	$(MAKE) clean-extra
+%-draft: CLASSOPTION =--variable classoption:draft
+%-draft: %
+.PHONY: %-draft
 
-quick: $(GENERATED_TEX)
-	pdflatex $(GENERATED_TEX)
-	$(MAKE) clean-extra
-.PHONY: quick
-
-pdf: $(TARGET_BASE).pdf
-.PHONY: pdf
-
-tex: $(GENERATED_TEX)
-.PHONY: tex
-
-tex-src: $(TEX_SRC)
-.PHONY: tex-src
-
-draft: CLASSOPTION =--variable classoption:draft
-draft: pdf
-.PHONY: draft
-
-final: CLASSOPTION =--variable classoption:final
-final: pdf
-.PHONY: final
+%-final: CLASSOPTION =--variable classoption:final
+%-final: %
+.PHONY: %-final
 
 
 # Meta Rules
@@ -72,12 +51,14 @@ print-%:
 .PHONY: print-%
 
 clean-extra:
-	@-rm *.log *.aux *.bcf *.bbl *.blg *.dvi *.out *.run.xml *.lot *.lof *.toc $(GENERATED_TEX) || true
+	@-rm *.log *.aux *.bcf *.bbl *.blg *.dvi *.out *.run.xml *.lot *.lof *.toc 2> /dev/null || true
 .PHONY: clean-extra
 
-clean: clean-extra clean-pdf
+clean: clean-extra
+	@-rm -r *.gen 2> /dev/null || true
+	@-rm *.gen.* 2> /dev/null || true
 .PHONY: clean
 
 clean-pdf:
-	@-rm *.pdf || true
+	@-rm *.gen.pdf 2> /dev/null || true
 .PHONY: clean-pdf

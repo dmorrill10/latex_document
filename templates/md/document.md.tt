@@ -1,12 +1,3 @@
 % <%= title %>
 % <%= author %>
 % <%= date %>
-
-Section 1
-=========
-
-Test reference: [@rcfr]
-
-
-References
-==========

@@ -58,7 +58,6 @@ module LatexDocument
     def fill_root
       super
       template("templates/md/document.md.tt", file_path("#{name}.md"))
-      create_file_from_shared_template 'references.bib'
     end
 
     protected
