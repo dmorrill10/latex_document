@@ -3,8 +3,9 @@ MD_SRC :=$(TARGET_BASE).md
 TEX_SRC :=$(TARGET_BASE).tex
 GENERATED_TEX :=$(TARGET_BASE).gen.tex
 GENERATED_PDF :=$(TARGET_BASE).gen.pdf
+GENERATED_HTML :=$(TARGET_BASE).gen.html
 
-ALL_TARGETS :=$(GENERATED_PDF)
+ALL_TARGETS :=$(GENERATED_PDF) $(GENERATED_TEX) $(GENERATED_HTML)
 
 # Build Rules
 #============
@@ -20,17 +21,40 @@ else
   PANDOC_BIB=
 endif
 
-ifdef TEMPLATE
-  PANDOC_TEMPLATE=--template=$(TEMPLATE)
+ifdef TEX_TEMPLATE
+  PANDOC_TEX_TEMPLATE=--template=$(TEX_TEMPLATE)
 else
-  PANDOC_TEMPLATE=
+  PANDOC_TEX_TEMPLATE=
 endif
 
-%.gen.pdf: %.md $(TEMPLATE) $(BIB)
+%.gen.pdf: %.md $(TEX_TEMPLATE) $(BIB)
 	pandoc \
 	$(PANDOC_BIB) \
-	$(PANDOC_TEMPLATE) \
+	$(PANDOC_TEX_TEMPLATE) \
 	$(CLASSOPTION) \
+	-s \
+	$< \
+	-o $@
+
+%.gen.tex: %.md $(TEX_TEMPLATE) $(BIB)
+	pandoc \
+	$(PANDOC_BIB) \
+	$(PANDOC_TEX_TEMPLATE) \
+	$(CLASSOPTION) \
+	-s \
+	$< \
+	-o $@
+
+ifdef HTML_TEMPLATE
+  PANDOC_HTML_TEMPLATE=--template=$(HTML_TEMPLATE)
+else
+  PANDOC_HTML_TEMPLATE=
+endif
+
+%.gen.html: %.gen.tex
+	pandoc \
+	$(PANDOC_HTML_TEMPLATE) \
+	--mathjax \
 	-s \
 	$< \
 	-o $@
